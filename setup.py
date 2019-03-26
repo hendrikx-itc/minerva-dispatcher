@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(
-    name="dispatcher",
+    name="minerva-dispatcher",
     author='Hendrikx ITC',
     author_email='info@hendrikx-itc.nl',
     version="5.0,0.dev1",
