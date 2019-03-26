@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-
 from setuptools import setup
 
 setup(
     name="dispatcher",
-    version="4.4.0",
+    author='Hendrikx ITC',
+    author_email='info@hendrikx-itc.nl',
+    version="5.0,0.dev2",
+    license='GPL',
+    description='Minerva Dispatcher library and commands',
+    python_requires='>=3.5',
     install_requires=[
         "configobj",
-        "minerva>=5.0.0",
+        "minerva-etl>=5.0.0",
         "pyinotify",
         "pyyaml",
         "pika"
