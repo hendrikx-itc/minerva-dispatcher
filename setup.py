@@ -5,13 +5,13 @@ setup(
     name="dispatcher",
     author='Hendrikx ITC',
     author_email='info@hendrikx-itc.nl',
-    version="5.0,0.dev2",
+    version="5.0,0.dev1",
     license='GPL',
     description='Minerva Dispatcher library and commands',
     python_requires='>=3.5',
     install_requires=[
         "configobj",
-        "minerva-etl>=5.0.0",
+        "minerva-etl>=5.0.0.dev2",
         "pyinotify",
         "pyyaml",
         "pika"
