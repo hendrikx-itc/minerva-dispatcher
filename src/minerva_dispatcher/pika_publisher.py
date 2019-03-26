@@ -3,30 +3,7 @@
 import pika
 from threading import Thread
 from minerva_dispatcher.error import RabbitError
-
-
-class Devnull_logger:
-    def info(self, text, *args):
-        pass
-
-    def warning(self, text, *args):
-        pass
-
-
-class File_logger:
-    def __init__(self, filename):
-        self._filename = filename
-
-    def info(self, text, *args):
-        f = open(self._filename, 'a')
-        f.write(text%args+"\n")
-        f.close()
-
-    def warning(self, text, *args):
-        f = open(self._filename, 'a')
-        f.write('Warning!\n')
-        f.write(text%args+'\n')
-        f.close()
+import logging
 
 
 class Publisher(Thread):
@@ -41,12 +18,11 @@ class Publisher(Thread):
     EXCHANGE = 'message'
     EXCHANGE_TYPE = 'topic'
 
-    def __init__(self, amqp_url, queue, routing_key=None, logger=None):
+    def __init__(self, amqp_url, queue, routing_key=None, logging=None):
         """Setup the example publisher object, passing in the URL we will use
         to connect to RabbitMQ.
         """
         Thread.__init__(self)
-        self.logger = File_logger('/var/log/minerva/publisher.log')
 
         self._connection = None
         self._channel = None
@@ -56,7 +32,7 @@ class Publisher(Thread):
 
         self._queue = queue
         self._key = routing_key or 'key'
-        self.logger.info('Initialized')
+        logging.info('Initialized')
 
     def connect(self):
         """This method connects to RabbitMQ, returning the connection handle.
@@ -72,7 +48,7 @@ class Publisher(Thread):
         print('queue: {}'.format(self._queue))
         print('key: {}'.format(self._key))
 
-        self.logger.info('Connecting to %s', self._url)
+        logging.info('Connecting to %s', self._url)
         return pika.SelectConnection(pika.URLParameters(self._url),
                                      on_open_callback=self.on_connection_open,
                                      on_close_callback=self.on_connection_closed,
@@ -87,7 +63,7 @@ class Publisher(Thread):
         :type unused_connection: pika.SelectConnection
 
         """
-        self.logger.info('Connection opened')
+        logging.info('Connection opened')
         self.open_channel()
 
     def on_connection_closed(self, connection, reply_code, reply_text):
@@ -104,7 +80,7 @@ class Publisher(Thread):
         if self._stopping:
             self._connection.ioloop.stop()
         else:
-            self.logger.warning('Connection closed, reopening in 5 seconds: (%s) %s',
+            logging.warning('Connection closed, reopening in 5 seconds: (%s) %s',
                            reply_code, reply_text)
             self._connection.add_timeout(5, self._connection.ioloop.stop)
 
@@ -115,7 +91,7 @@ class Publisher(Thread):
         will be invoked.
 
         """
-        self.logger.info('Creating a new channel')
+        logging.info('Creating a new channel')
         self._connection.channel(on_open_callback=self.on_channel_open)
 
     def on_channel_open(self, channel):
@@ -127,7 +103,7 @@ class Publisher(Thread):
         :param pika.channel.Channel channel: The channel object
 
         """
-        self.logger.info('Channel opened')
+        logging.info('Channel opened')
         self._channel = channel
         self.add_on_channel_close_callback()
         self.setup_exchange(self.EXCHANGE)
@@ -137,7 +113,7 @@ class Publisher(Thread):
         RabbitMQ unexpectedly closes the channel.
 
         """
-        self.logger.info('Adding channel close callback')
+        logging.info('Adding channel close callback')
         self._channel.add_on_close_callback(self.on_channel_closed)
 
     def on_channel_closed(self, channel, reply_code, reply_text):
@@ -152,7 +128,7 @@ class Publisher(Thread):
         :param str reply_text: The text reason the channel was closed
 
         """
-        self.logger.warning('Channel was closed: (%s) %s', reply_code, reply_text)
+        logging.warning('Channel was closed: (%s) %s', reply_code, reply_text)
         self._channel = None
         if not self._stopping:
             self._connection.close()
@@ -165,7 +141,7 @@ class Publisher(Thread):
         :param str|unicode exchange_name: The name of the exchange to declare
 
         """
-        self.logger.info('Declaring exchange %s', exchange_name)
+        logging.info('Declaring exchange %s', exchange_name)
         self._channel.exchange_declare(self.on_exchange_declareok,
                                        exchange_name,
                                        self.EXCHANGE_TYPE)
@@ -177,7 +153,7 @@ class Publisher(Thread):
         :param pika.Frame.Method unused_frame: Exchange.DeclareOk response frame
 
         """
-        self.logger.info('Exchange declared')
+        logging.info('Exchange declared')
         self.setup_queue(self._queue)
 
     def setup_queue(self, queue_name):
@@ -188,7 +164,7 @@ class Publisher(Thread):
         :param str|unicode queue_name: The name of the queue to declare.
 
         """
-        self.logger.info('Declaring queue %s', queue_name)
+        logging.info('Declaring queue %s', queue_name)
         self._channel.queue_declare(self.on_queue_declareok, queue_name)
 
     def on_queue_declareok(self, method_frame):
@@ -201,7 +177,7 @@ class Publisher(Thread):
         :param pika.frame.Method method_frame: The Queue.DeclareOk frame
 
         """
-        self.logger.info('Binding %s to %s with %s',
+        logging.info('Binding %s to %s with %s',
                          self.EXCHANGE, self._queue, self._key)
         self._channel.queue_bind(self.on_bindok, self._queue,
                                  self.EXCHANGE, self._key)
@@ -210,7 +186,7 @@ class Publisher(Thread):
         """This method is invoked by pika when it receives the Queue.BindOk
         response from RabbitMQ. Since we know we're now setup and bound, it's
         time to start publishing."""
-        self.logger.info('Queue bound')
+        logging.info('Queue bound')
         self.start_publishing()
 
     def start_publishing(self):
@@ -218,7 +194,7 @@ class Publisher(Thread):
         first message to be sent to RabbitMQ
 
         """
-        self.logger.info('Issuing consumer related RPC commands')
+        logging.info('Issuing consumer related RPC commands')
         self.enable_delivery_confirmations()
 
     def enable_delivery_confirmations(self):
@@ -232,7 +208,7 @@ class Publisher(Thread):
         is confirming or rejecting.
 
         """
-        self.logger.info('Issuing Confirm.Select RPC command')
+        logging.info('Issuing Confirm.Select RPC command')
         self._channel.confirm_delivery(self.on_delivery_confirmation)
 
     def on_delivery_confirmation(self, method_frame):
@@ -249,7 +225,7 @@ class Publisher(Thread):
         on_delivery_confirmations method.
         """
 
-        self.logger.info('Message: {}'.format(message))
+        logging.info('Message: {}'.format(message))
 
         if self._channel is None:
             raise RabbitError('No channel defined')
@@ -269,7 +245,7 @@ class Publisher(Thread):
         while not self._stopping:
             self._connection = self.connect()
             self._connection.ioloop.start()            
-        self.logger.info('Stopped')
+        logging.info('Stopped')
 
     def stop(self):
         """Stop the example by closing the channel and connection. We
@@ -280,7 +256,7 @@ class Publisher(Thread):
         disconnect from RabbitMQ.
 
         """
-        self.logger.info('Stopping')
+        logging.info('Stopping')
         self._stopping = True
         self.close_channel()
         self.close_connection()
@@ -291,11 +267,11 @@ class Publisher(Thread):
 
         """
         if self._channel is not None:
-            self.logger.info('Closing the channel')
+            logging.info('Closing the channel')
             self._channel.close()
 
     def close_connection(self):
         """This method closes the connection to RabbitMQ."""
         if self._connection is not None:
-            self.logger.info('Closing connection')
+            logging.info('Closing connection')
             self._connection.close()

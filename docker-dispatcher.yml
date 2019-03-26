@@ -1,0 +1,15 @@
+rabbitmq:
+  url: "amqp://guest:guest@rabbit:5672/%2F?connection_attempts=3&heartbeat_interval=3600"
+  queue: aireas
+  routing_key: minerva
+  logger: minerva-dispatcher
+
+job_sources:
+  - name: aireas
+    job_type: harvest
+    config:
+      data_source: aireas
+      data_type: aireas
+      match_pattern: ".*"
+      recursive: true
+      uri: /input
