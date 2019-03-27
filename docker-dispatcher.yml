@@ -12,4 +12,4 @@ job_sources:
       data_type: aireas
       match_pattern: ".*"
       recursive: true
-      uri: /input
+      uri: /data
