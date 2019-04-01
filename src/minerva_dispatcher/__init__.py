@@ -31,8 +31,6 @@ class JobCollector:
     def __init__(self, job_sources, rabbitmq_config):
         self.job_sources = job_sources
 
-        print(rabbitmq_config)
-
         self.publisher = Publisher(
             rabbitmq_config['url'],
             rabbitmq_config['queue'],

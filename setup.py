@@ -14,7 +14,7 @@ setup(
         "minerva-etl>=5.0.0.dev2",
         "pyinotify",
         "pyyaml",
-        "pika"
+        "pika==0.13.0"
     ],
     test_suite="nose.collector",
     package_data={"minerva_dispatcher": ["defaults/*"]},
