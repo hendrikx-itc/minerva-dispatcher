@@ -5,7 +5,7 @@ setup(
     name="minerva-dispatcher",
     author='Hendrikx ITC',
     author_email='info@hendrikx-itc.nl',
-    version="5.0.0.dev2",
+    version="5.0,0.dev3",
     license='GPL',
     description='Minerva Dispatcher library and commands',
     python_requires='>=3.5',
