@@ -11,7 +11,6 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         "configobj",
-        "minerva-etl>=5.0.0.dev2",
         "pyinotify",
         "pyyaml",
         "pika==0.13.0"
