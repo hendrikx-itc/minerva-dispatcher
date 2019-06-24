@@ -1,0 +1,20 @@
+rabbitmq:
+  url: "amqp://guest:guest@rabbitmq:5672/%2F?connection_attempts=3"
+  queue: node
+  routing_key: minerva
+  logger: minerva-dispatcher
+
+job_sources:
+  - name: weather-sensors
+    job_type: harvest
+    config:
+      data_source: weather-sensors
+      data_type: csv
+      on_failure:
+        name: move
+        args:
+          - /data/fringe/weather-sensors
+      parser_config:
+      match_pattern: ".*csv$"
+      recursive: false
+      uri: /data/weather-sensors/

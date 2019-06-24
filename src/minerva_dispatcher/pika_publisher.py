@@ -44,11 +44,8 @@ class Publisher(Thread):
         :rtype: pika.SelectConnection
 
         """
-        print('url: {}'.format(self._url))
-        print('queue: {}'.format(self._queue))
-        print('key: {}'.format(self._key))
+        logging.info('Connecting to %s, queue: %s, routing_key: %s', self._url, self._queue, self._key)
 
-        logging.info('Connecting to %s', self._url)
         return pika.SelectConnection(pika.URLParameters(self._url),
                                      on_open_callback=self.on_connection_open,
                                      on_close_callback=self.on_connection_closed,
@@ -236,7 +233,7 @@ class Publisher(Thread):
         properties = pika.BasicProperties(app_id='minerva-publisher',
                                           content_type='application/json')
 
-        print("Published message: {}".format(message))
+        logging.debug("Published message: {}".format(message))
 
         self._channel.basic_publish(self.EXCHANGE, self._key,
                                     message, properties)
