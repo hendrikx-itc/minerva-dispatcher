@@ -138,7 +138,7 @@ class Publisher(Thread):
         :param str|unicode exchange_name: The name of the exchange to declare
 
         """
-        logging.info('Declaring exchange %s', exchange_name)
+        logging.info("Declaring exchange '%s'", exchange_name)
         self._channel.exchange_declare(self.on_exchange_declareok,
                                        exchange_name,
                                        self.EXCHANGE_TYPE)
@@ -174,7 +174,7 @@ class Publisher(Thread):
         :param pika.frame.Method method_frame: The Queue.DeclareOk frame
 
         """
-        logging.info('Binding %s to %s with %s',
+        logging.info("Binding '%s' to '%s' with '%s'",
                          self.EXCHANGE, self._queue, self._key)
         self._channel.queue_bind(self.on_bindok, self._queue,
                                  self.EXCHANGE, self._key)
