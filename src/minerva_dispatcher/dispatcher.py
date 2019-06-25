@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Minerva Dispatcher command line script.
 
@@ -57,8 +55,12 @@ def main():
     job_collector = JobCollector(job_sources, config['rabbitmq'])
     job_collector.start()
 
+    root_logger = logging.getLogger()
+
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        root_logger.setLevel(logging.DEBUG)
+    else:
+        root_logger.setLevel(logging.INFO)
 
     logging.info("started with pid {0:d}".format(os.getpid()))
 
